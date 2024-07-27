@@ -3,128 +3,78 @@
 
 #include <iostream>
 #include <bits/stdc++.h>
-#include <unordered_map>
 #include <stack>
 
-#include "graph.hpp"
+#include "EulerianCycleFinder.hpp"
 
-void printCircuit(Graph graph)
+EulerianCycleFinder::EdgeVector generateGraph(int v, int e, int seed)
 {
-	auto adj = graph.getAdjList();
-	// adj represents the adjacency list of
-	// the directed graph
-	// edge_count represents the number of edges
-	// emerging from a vertex
-	std::unordered_map<int, int> edge_count;
+	EulerianCycleFinder::EdgeVector graph;
+	std::srand(seed);
 
-	for (int i = 0; i < adj.size(); i++)
+	for (int i = 0; i < e; i++)
 	{
-		// find the count of edges to keep track
-		// of unused edges
-		edge_count[i] = adj[i].size();
-	}
-
-	if (!adj.size())
-		return; // empty graph
-
-	// Maintain a stack to keep vertices
-	std::stack<int> curr_path;
-
-	// vector to store final circuit
-	std::vector<int> circuit;
-
-	// start from any vertex
-	curr_path.push(0);
-	int curr_v = 0; // Current vertex
-
-	while (!curr_path.empty())
-	{
-		// If there's remaining edge
-		if (edge_count[curr_v])
+		int v1 = std::rand() % v;
+		int v2 = std::rand() % v;
+		if (v1 == v2)
 		{
-			// Push the vertex
-			curr_path.push(curr_v);
-
-			// Find the next vertex using an edge
-			int next_v = adj[curr_v].back();
-
-			// and remove that edge
-			edge_count[curr_v]--;
-			adj[curr_v].pop_back();
-
-			// Move to next vertex
-			curr_v = next_v;
+			i--;
+			continue;
 		}
-
-		// back-track to find remaining circuit
-		else
+		int flag = 0;
+		// if the edge already exists in the graph, ignore it
+		for (auto &edge : graph)
 		{
-			circuit.push_back(curr_v);
-
-			// Back-tracking
-			curr_v = curr_path.top();
-			curr_path.pop();
+			std::cout << "edge[0]: " << edge[0] << " edge[1]: " << edge[1] << std::endl;
+			if ((edge[0] == v1 && edge[1] == v2))
+			{
+				i--;
+				flag = 1;
+			}
 		}
+		if (flag)
+			continue;
+
+		std::cout << v1 << " -> " << v2 << std::endl;
+		graph.push_back({v1, v2});
+		graph.push_back({v2, v1});
 	}
 
-	// we've got the circuit, now print it in reverse
-	for (int i = circuit.size() - 1; i >= 0; i--)
-	{
-		std::cout << circuit[i];
-		if (i)
-			std::cout << " -> ";
-	}
+	return graph;
 }
 
 // Driver program to check the above function
-int main()
+int main(int argc, char **argv)
 {
-	// std::vector<std::vector<int>> adj1, adj2;
-	Graph graph1(3), graph2(7);
+	int opt = 0, seed = 0, v = 0, e = 0;
+	if (argc < 4)
+	{
+		std::cerr << "Usage: " << argv[0] << " -e <edges> -v <vertices> -s <seed>" << std::endl;
+		std::exit(1);
+	}
 
-	graph1.addEdge(0, 1);
-	graph1.addEdge(1, 2);
-	graph1.addEdge(2, 0);
+	while ((opt = getopt(argc, argv, "e:v:s:")) != -1)
+	{
+		switch (opt)
+		{
+		case 'e':
+			e = atoi(optarg);
+			break;
+		case 'v':
+			v = atoi(optarg);
+			break;
+		case 's':
+			seed = atoi(optarg);
+			break;
+		default:
+			break;
+		}
+	}
 
-	graph2.addEdge(0, 1);
-	graph2.addEdge(0, 6);
-	graph2.addEdge(1, 2);
-	graph2.addEdge(2, 0);
-	graph2.addEdge(2, 3);
-	graph2.addEdge(3, 4);
-	graph2.addEdge(4, 2);
-	graph2.addEdge(4, 5);
-	graph2.addEdge(5, 0);
-	graph2.addEdge(6, 4);
-
-	printCircuit(graph1);
+	auto directedEdges = generateGraph(v, e, seed);
+	EulerianCycleFinder finder(directedEdges);
+	finder.printEulerianCycle();
 	std::cout << std::endl;
-	printCircuit(graph2);
-	std::cout << std::endl;
-
-	// Input Graph 1
-	// adj1.resize(3);
-
-	// Build the edges
-	// adj1[0].push_back(1);
-	// adj1[1].push_back(2);
-	// adj1[2].push_back(0);
-	// printCircuit(adj1);
-	// std::cout << std::endl;
-
-	// Input Graph 2
-	// adj2.resize(7);
-	// adj2[0].push_back(1);
-	// adj2[0].push_back(6);
-	// adj2[1].push_back(2);
-	// adj2[2].push_back(0);
-	// adj2[2].push_back(3);
-	// adj2[3].push_back(4);
-	// adj2[4].push_back(2);
-	// adj2[4].push_back(5);
-	// adj2[5].push_back(0);
-	// adj2[6].push_back(4);
-	// printCircuit(adj2);
 
 	return 0;
 }

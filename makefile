@@ -1,6 +1,6 @@
 CC = g++
 CFLAGS = -pg -g -Wall -Werror -Wextra
-OBJS = hierholzers.o graph.o
+OBJS = hierholzers.o EulerianCycleFinder.o
 
 all: hierholzers
 
@@ -12,3 +12,5 @@ hierholzers: $(OBJS)
 
 clean:
 	rm -f hierholzers *.o gmon.out *.gcov *.gcda *.gcno
+
+.PHONY: clean all
