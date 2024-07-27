@@ -1,2 +1,3 @@
-# OperatingSystems_Ex4
+# Valgrind, Graph data structure and Euler
+
 Valgrind usage
