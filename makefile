@@ -4,7 +4,7 @@ OBJS = hierholzers.o EulerianCycleFinder.o
 
 all: hierholzers hello
 
-hello: hello.o
+hello: Ex5+6/hello.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 hierholzers: $(OBJS)
@@ -16,5 +16,5 @@ hierholzers: $(OBJS)
 .PHONY: clean all
 
 clean:
-	rm -f hierholzers hello *.o gmon.out *.gcov *.gcda *.gcno
+	rm -f hierholzers Ex5+6/hello *.o Ex5+6/*.o gmon.out *.gcov *.gcda *.gcno
 
