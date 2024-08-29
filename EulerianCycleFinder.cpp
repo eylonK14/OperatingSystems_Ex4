@@ -1,112 +1,71 @@
-#include "EulerianCycleFinder.hpp"
+#pragma once
 
-EulerianCycleFinder::EulerianCycleFinder(const EdgeVector &edges)
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+#include <unordered_set>
+
+/**
+ * @class EulerianCycleFinder
+ * @brief Class for finding Eulerian cycles in a graph.
+ *
+ * The EulerianCycleFinder class provides functionality to find Eulerian cycles in a graph.
+ * It takes a vector of edges as input and can print the Eulerian cycle if one exists.
+ */
+class EulerianCycleFinder
 {
-    ConstructMapping(edges);
-}
+public:
+    using EdgeVector = std::vector<std::vector<int>>;
 
-void EulerianCycleFinder::printEulerianCycle()
-{
-    if ((*this).IsEulerianCycle())
+    /**
+     * @brief Constructs an EulerianCycleFinder object with the given edges.
+     * @param edges The vector of edges representing the graph.
+     */
+    explicit EulerianCycleFinder(const EdgeVector &edges);
+
+    /**
+     * @brief Prints the Eulerian cycle if one exists.
+     */
+    void printEulerianCycle(int);
+
+private:
+    /**
+     * @struct Vertex
+     * @brief Represents a vertex in the graph.
+     */
+
+    struct Vertex
     {
-        std::vector<int> eulerianCycle;
-        (*this).FindEulerianCycle(0, eulerianCycle);
+        std::unordered_map<int, bool> outgoingEdges; /**< The set of outgoing edges from the vertex. */
+        std::unordered_map<int, bool> ingoingEdges;  /**< The set of ingoing edges to the vertex. */
+    };
 
-        std::cout << "Start --> ";
-        for (const auto &vertex : eulerianCycle)
-        {
-            std::cout << vertex << " --> ";
-        }
-        std::cout << "End" << std::endl;
-    }
-    else
-    {
-        std::cout << "Graph has no Eulerian Cycle!" << std::endl;
-    }
-}
+    std::unordered_map<int, Vertex> m_vertexMap; /**< The mapping of vertex IDs to Vertex objects. */
 
-bool EulerianCycleFinder::IsEulerianCycle() const
-{
-    if (m_vertexMap.empty())
-    {
-        return false;
-    }
-    size_t edgesCount = 0;
+    /**
+     * @brief Checks if the graph has an Eulerian cycle.
+     * @return True if the graph has an Eulerian cycle, false otherwise.
+     */
+    bool IsEulerianCycle(int) const;
 
-    int oddDegreeCount = 0;
-    for (const auto &vertex : m_vertexMap)
-    {
-        edgesCount += vertex.second.outgoingEdges.size();
-        if (vertex.second.ingoingEdges.size() !=
-            vertex.second.outgoingEdges.size())
-        {
-            oddDegreeCount++;
-        }
-    }
-    if (oddDegreeCount != 0 && oddDegreeCount != 2)
-    {
-        return false;
-    }
-    std::cout << "Edges Count: " << edgesCount << std::endl;
-    std::cout << "Vertex Count: " << m_vertexMap.size() << std::endl;
-    if (edgesCount < m_vertexMap.size())
-    {
-        return false;
-    }
+    /**
+     * @brief Finds the Eulerian cycle in the graph starting from the given vertex.
+     * @param startingVertex The starting vertex for the Eulerian cycle.
+     * @param eulerianCycle The vector to store the Eulerian cycle.
+     * @return True if an Eulerian cycle is found, false otherwise.
+     */
+    bool FindEulerianCycle(int startingVertex, std::vector<int> &eulerianCycle);
 
-    // for (const auto &vertex : m_vertexMap)
-    // {
-    //     if (vertex.second.ingoingEdges.size() !=
-    //         vertex.second.outgoingEdges.size())
-    //     {
-    //         return false;
-    //     }
-    // }
+    /**
+     * @brief Constructs the mapping of vertex IDs to Vertex objects.
+     * @param edges The vector of edges representing the graph.
+     */
+    void ConstructMapping(const EdgeVector &edges);
 
-    return true;
-}
-
-bool EulerianCycleFinder::FindEulerianCycle(
-    int startingVertex,
-    std::vector<int> &eulerianCycle)
-{
-    DFS(startingVertex, eulerianCycle);
-
-    return true;
-}
-
-void EulerianCycleFinder::ConstructMapping(const EdgeVector &edges)
-{
-    for (const auto &edge : edges)
-    {
-        int src{edge.at(0)};
-        int dest{edge.at(1)};
-
-        if (m_vertexMap.find(src) == m_vertexMap.end())
-            m_vertexMap[src] = Vertex{};
-
-        if (m_vertexMap.find(dest) == m_vertexMap.end())
-            m_vertexMap[dest] = Vertex{};
-
-        m_vertexMap[src].outgoingEdges.insert(dest);
-        m_vertexMap[dest].ingoingEdges.insert(src);
-    }
-}
-
-void EulerianCycleFinder::DFS(int src, std::vector<int> &eulerianCycle)
-{
-    Vertex &currVertex{m_vertexMap[src]};
-
-    while (!currVertex.outgoingEdges.empty())
-    {
-        int dest{*currVertex.outgoingEdges.begin()};
-        currVertex.outgoingEdges.erase(dest);
-
-        Vertex &destVertex{m_vertexMap[dest]};
-        destVertex.ingoingEdges.erase(src);
-
-        DFS(dest, eulerianCycle);
-    }
-
-    eulerianCycle.insert(eulerianCycle.begin(), src);
-}
+    /**
+     * @brief Performs a depth-first search to find the Eulerian cycle.
+     * @param src The source vertex for the depth-first search.
+     * @param eulerianCycle The vector to store the Eulerian cycle.
+     */
+    void DFS(int src, std::vector<int> &eulerianCycle);
+};
