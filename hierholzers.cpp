@@ -37,7 +37,7 @@ EulerianCycleFinder::EdgeVector generateGraph(int v, int e, int seed)
 
 		std::cout << v1 << " -> " << v2 << std::endl;
 		graph.push_back({v1, v2});
-		graph.push_back({v2, v1});
+		// graph.push_back({v2, v1});
 	}
 
 	return graph;
