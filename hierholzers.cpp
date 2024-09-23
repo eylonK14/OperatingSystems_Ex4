@@ -1,49 +1,22 @@
-// A C++ program to print Eulerian circuit in given
-// directed graph using Hierholzer algorithm
-
-#include <iostream>
-#include <bits/stdc++.h>
-#include <stack>
-
 #include "EulerianCycleFinder.hpp"
 
-EulerianCycleFinder::EdgeVector generateGraph(const int v, const int e, const int seed)
+// Function to run test cases
+void test(Graph &g)
 {
-    EulerianCycleFinder::EdgeVector graph;
-    std::srand(seed);
-
-    for (int i = 0; i < e; i++)
-    {
-        int v1 = std::rand() % v;
-        int v2 = std::rand() % v;
-        if (v1 == v2)
-        {
-            i--;
-            continue;
-        }
-        int flag = 0;
-        // if the edge already exists in the graph, ignore it
-        for (auto &edge : graph)
-        {
-            // std::cout << "edge[0]: " << edge[0] << " edge[1]: " << edge[1] << std::endl;
-            if (edge[0] == v1 && edge[1] == v2 || edge[0] == v2 && edge[1] == v1)
-            {
-                i--;
-                flag = 1;
-            }
-        }
-        if (flag)
-            continue;
-
-        std::cout << v1 << " -> " << v2 << std::endl;
-        graph.push_back({v1, v2});
-        // graph.push_back({v2, v1});
-    }
-
-    return graph;
+	int res = g.isEulerian();
+	if (res == 0)
+		std::cout << "graph is not Eulerian" << std::endl;
+    
+	else if (res == 1)
+		std::cout << "graph has a Euler path" << std::endl;
+	else
+	{
+		std::cout << "graph has a Euler cycle: " << std::endl;
+		g.printEulerCircuit();
+	}
 }
 
-// Driver program to check the above function
+// Driver program to test above function
 int main(const int argc, char **argv)
 {
     int opt = 0, seed = 0, v = 0, e = 0;
@@ -71,10 +44,9 @@ int main(const int argc, char **argv)
         }
     }
 
-    const auto directedEdges = generateGraph(v, e, seed);
-    EulerianCycleFinder finder(directedEdges);
-    finder.printEulerianCycle(v);
-    std::cout << std::endl;
-
-    return 0;
+	Graph g = Graph::generateRandomGraph(v, e, seed);
+	g.printGraph();
+	test(g);
+	std::cout << std::endl;
+	std::exit(0);
 }

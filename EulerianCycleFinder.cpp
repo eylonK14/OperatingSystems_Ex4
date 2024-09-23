@@ -1,71 +1,184 @@
-#pragma once
+#include "EulerianCycleFinder.hpp"
 
-#include <iostream>
-#include <vector>
-#include <unordered_map>
-#include <unordered_set>
-
-/**
- * @class EulerianCycleFinder
- * @brief Class for finding Eulerian cycles in a graph.
- *
- * The EulerianCycleFinder class provides functionality to find Eulerian cycles in a graph.
- * It takes a vector of edges as input and can print the Eulerian cycle if one exists.
- */
-class EulerianCycleFinder
+void Graph::addEdge(int v, int w)
 {
-public:
-    using EdgeVector = std::vector<std::vector<int>>;
+	adj[v].push_back(w);
+	// adj[w].push_back(v); // Note: the graph is undirected
+}
 
-    /**
-     * @brief Constructs an EulerianCycleFinder object with the given edges.
-     * @param edges The vector of edges representing the graph.
-     */
-    explicit EulerianCycleFinder(const EdgeVector &edges);
+int Graph::degree(int v)
+{
+	return outDegree(v) + inDegree(v);
+}
 
-    /**
-     * @brief Prints the Eulerian cycle if one exists.
-     */
-    void printEulerianCycle(int);
+int Graph::inDegree(int v)
+{
+	int in_going_edges = 0;
+	for (int i = 0; i < this->V; i++)
+		for (std::list<int>::iterator it = adj[i].begin(); it != adj[i].end(); it++)
+			if (*it == v)
+				in_going_edges++;
+	return in_going_edges;
+}
 
-private:
-    /**
-     * @struct Vertex
-     * @brief Represents a vertex in the graph.
-     */
+int Graph::outDegree(int v)
+{
+	return adj[v].size();
+}
 
-    struct Vertex
-    {
-        std::unordered_map<int, bool> outgoingEdges; /**< The set of outgoing edges from the vertex. */
-        std::unordered_map<int, bool> ingoingEdges;  /**< The set of ingoing edges to the vertex. */
-    };
+void Graph::printGraph()
+{
+	for (int i = 0; i < this->V; i++)
+	{
+		std::cout << i << ": ";
+		std::list<int>::iterator it;
+		for (it = adj[i].begin(); it != adj[i].end(); it++)
+		{
+			std::cout << *it << " ";
+		}
+		std::cout << std::endl;
+	}
+}
 
-    std::unordered_map<int, Vertex> m_vertexMap; /**< The mapping of vertex IDs to Vertex objects. */
+void Graph::DFSUtil(int v, int visited[])
+{
+	// Mark the current node as visited and print it
+	visited[v]++; // = true;
 
-    /**
-     * @brief Checks if the graph has an Eulerian cycle.
-     * @return True if the graph has an Eulerian cycle, false otherwise.
-     */
-    bool IsEulerianCycle(int) const;
+	// Recur for all the vertices adjacent to this vertex
+	std::list<int>::iterator it;
+	for (it = adj[v].begin(); it != adj[v].end(); ++it)
+		if (visited[*it] < degree(*it))
+			DFSUtil(*it, visited);
+}
 
-    /**
-     * @brief Finds the Eulerian cycle in the graph starting from the given vertex.
-     * @param startingVertex The starting vertex for the Eulerian cycle.
-     * @param eulerianCycle The vector to store the Eulerian cycle.
-     * @return True if an Eulerian cycle is found, false otherwise.
-     */
-    bool FindEulerianCycle(int startingVertex, std::vector<int> &eulerianCycle);
+// Method to check if all non-zero degree vertices are connected.
+// It mainly does DFS traversal starting from
+bool Graph::isConnected()
+{
+	// Mark all the vertices as not visited
+	int visited[V];
+	int i;
+	for (i = 0; i < V; i++)
+		visited[i] = 0;
 
-    /**
-     * @brief Constructs the mapping of vertex IDs to Vertex objects.
-     * @param edges The vector of edges representing the graph.
-     */
-    void ConstructMapping(const EdgeVector &edges);
+	// Find a vertex with non-zero degree
+	for (i = 0; i < V; i++)
+		if (degree(i) != 0)
+			break;
 
-    /**
-     * @brief Performs a depth-first search to find the Eulerian cycle.
-     * @param src The source vertex for the depth-first search.
-     * @param eulerianCycle The vector to store the Eulerian cycle.
-     */
-    void DFS(int src, std::vector<int> &eulerianCycle);
-};
+	// If there are no edges in the graph, return true
+	if (i == V)
+		return true;
+
+	// Start DFS traversal from a vertex with non-zero degree
+	DFSUtil(i, visited);
+
+	// Check if all non-zero degree vertices are visited
+	for (i = 0; i < V; i++)
+	if (visited[i] == 0 && degree(i) > 0)
+			return false;
+
+	return true;
+}
+
+/* The function returns one of the following values
+0 --> If graph is not Eulerian
+1 --> If graph has an Euler path (Semi-Eulerian)
+2 --> If graph has an Euler Circuit (Eulerian) */
+int Graph::isEulerian()
+{
+	// Check if all non-zero degree vertices are connected
+	if (isConnected() == false)
+		return 0;
+
+	// Count vertices with odd degree
+	int odd = 0;
+	for (int i = 0; i < V; i++)
+	{
+		odd += degree(i) % 2;
+		if (inDegree(i) != outDegree(i))
+			return 0;
+	}
+
+	// If count is more than 2, then graph is not Eulerian
+	if (odd > 2)
+		return 0;
+
+	// If odd count is 2, then semi-eulerian.
+	// If odd count is 0, then eulerian
+	// Note that odd count can never be 1 for undirected graph
+	return odd ? 1 : 2;;
+}
+
+void Graph::printEulerCircuit()
+{
+	if (adj == nullptr) return;
+
+    std::stack<int> curr_path;
+    std::vector<int> circuit;
+    
+    curr_path.push(0);
+
+    while (!curr_path.empty()) {
+        int curr_v = curr_path.top();
+
+        if (!adj[curr_v].empty()) {
+            int next_v = adj[curr_v].back();
+            adj[curr_v].pop_back();
+            curr_path.push(next_v);
+        } else {
+            circuit.push_back(curr_v);
+            curr_path.pop();
+        }
+    }
+
+    for (int i = circuit.size() - 1; i >= 0; i--) {
+        std::cout << circuit[i];
+        if (i > 0) {
+            std::cout << " -> ";
+        }
+    }
+    std::cout << std::endl;
+}
+
+Graph Graph::generateRandomGraph(int v, int e, int seed)
+{
+	std::srand(seed);
+	Graph g(v);
+	for (int i = 0; i < e; i++)
+	{
+		int src = std::rand() % v;
+		int dst = std::rand() % v;
+		if (src == dst)
+		{
+			i--;
+			continue;
+		}
+
+		// if the edge already exists, skip it
+		bool flag = false;
+		std::list<int>::iterator it;
+		for (it = g.adj[src].begin(); it != g.adj[src].end(); it++)
+			if (*it == dst)
+				flag = true;
+		if (flag)
+		{
+			i--;
+			continue;
+		}
+
+		// if the opposite edge already exists, skip it
+		for (it = g.adj[dst].begin(); it != g.adj[dst].end(); it++)
+			if (*it == src)
+				flag = true;
+		if (flag)
+		{
+			i--;
+			continue;
+		}
+
+		g.addEdge(src, dst);
+	}
+	return g;
+}
