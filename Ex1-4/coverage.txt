@@ -1,0 +1,7 @@
+File 'EulerianCycleFinder.cpp'
+Lines executed:96.04% of 101
+Creating 'EulerianCycleFinder.cpp.gcov'
+
+File 'hierholzers.cpp'
+Lines executed:97.14% of 35
+Creating 'hierholzers.cpp.gcov'

@@ -1,0 +1,296 @@
+        -:    0:Source:EulerianCycleFinder.cpp
+        -:    0:Graph:EulerianCycleFinder.gcno
+        -:    0:Data:EulerianCycleFinder.gcda
+        -:    0:Runs:10003
+        -:    1:#include "EulerianCycleFinder.hpp"
+        -:    2:
+        -:    3:/**
+        -:    4: * @brief Adds an edge to the graph.
+        -:    5: *
+        -:    6: * This function adds a directed edge from vertex v to vertex w in the adjacency list.
+        -:    7: *
+        -:    8: * @param v The starting vertex of the edge.
+        -:    9: * @param w The ending vertex of the edge.
+        -:   10: */
+    60003:   11:void Graph::addEdge(int v, int w)
+        -:   12:{
+    60003:   13:    adj[v].push_back(w);
+    60003:   14:}
+        -:   15:
+        -:   16:/**
+        -:   17: * @brief Computes the degree of a vertex in the graph.
+        -:   18: *
+        -:   19: * The degree of a vertex is defined as the sum of its out-degree and in-degree.
+        -:   20: *
+        -:   21: * @param v The vertex for which the degree is to be computed.
+        -:   22: * @return The degree of the vertex.
+        -:   23: */
+    78809:   24:int Graph::degree(int v)
+        -:   25:{
+    78809:   26:    return outDegree(v) + inDegree(v);
+        -:   27:}
+        -:   28:
+        -:   29:/**
+        -:   30: * @brief Calculates the in-degree of a given vertex in the graph.
+        -:   31: *
+        -:   32: * The in-degree of a vertex is the number of edges directed towards that vertex.
+        -:   33: *
+        -:   34: * @param v The vertex for which the in-degree is to be calculated.
+        -:   35: * @return The in-degree of the vertex.
+        -:   36: */
+    82263:   37:int Graph::inDegree(int v)
+        -:   38:{
+    82263:   39:    int in_going_edges = 0;
+   493572:   40:    for (int i = 0; i < this->V; i++)
+   904869:   41:        for (std::list<int>::iterator it = adj[i].begin(); it != adj[i].end(); it++)
+   493560:   42:            if (*it == v)
+   114800:   43:                in_going_edges++;
+    82263:   44:    return in_going_edges;
+        -:   45:}
+        -:   46:
+        -:   47:/**
+        -:   48: * @brief Computes the out-degree of a given vertex in the graph.
+        -:   49: *
+        -:   50: * The out-degree of a vertex is the number of edges leaving that vertex.
+        -:   51: *
+        -:   52: * @param v The vertex for which the out-degree is to be computed.
+        -:   53: * @return The out-degree of the specified vertex.
+        -:   54: */
+    82263:   55:int Graph::outDegree(int v)
+        -:   56:{
+    82263:   57:    return adj[v].size();
+        -:   58:}
+        -:   59:
+        -:   60:/**
+        -:   61: * @brief Prints the adjacency list representation of the graph.
+        -:   62: *
+        -:   63: * This function iterates through each vertex of the graph and prints
+        -:   64: * its adjacency list. Each vertex and its corresponding adjacent vertices
+        -:   65: * are printed in the format:
+        -:   66: *
+        -:   67: * vertex: adjacent_vertex1 adjacent_vertex2 ...
+        -:   68: *
+        -:   69: * Example output for a graph with 3 vertices:
+        -:   70: * 0: 1 2
+        -:   71: * 1: 0 2
+        -:   72: * 2: 0 1
+        -:   73: *
+        -:   74: * @note This function assumes that the graph is represented using an
+        -:   75: * adjacency list stored in the member variable `adj`.
+        -:   76: */
+    10001:   77:void Graph::printGraph()
+        -:   78:{
+    60005:   79:    for (int i = 0; i < this->V; i++)
+        -:   80:    {
+    50004:   81:        std::cout << i << ": ";
+    50004:   82:        std::list<int>::iterator it;
+   110007:   83:        for (it = adj[i].begin(); it != adj[i].end(); it++)
+        -:   84:        {
+    60003:   85:            std::cout << *it << " ";
+        -:   86:        }
+    50004:   87:        std::cout << std::endl;
+        -:   88:    }
+    10001:   89:}
+        -:   90:
+        -:   91:/**
+        -:   92: * @brief Utility function for Depth First Search (DFS) traversal of the graph.
+        -:   93: *
+        -:   94: * This function is used to traverse the graph starting from a given vertex `v`.
+        -:   95: * It marks the visited vertices and recursively visits all the vertices that
+        -:   96: * are adjacent to the current vertex and have not been fully visited.
+        -:   97: *
+        -:   98: * @param v The starting vertex for the DFS traversal.
+        -:   99: * @param visited An array to keep track of the visited vertices. Each element
+        -:  100: *                in the array represents the number of times a vertex has been visited.
+        -:  101: */
+    54758:  102:void Graph::DFSUtil(int v, int visited[])
+        -:  103:{
+    54758:  104:    visited[v]++;
+        -:  105:
+    54758:  106:    std::list<int>::iterator it;
+   112371:  107:    for (it = adj[v].begin(); it != adj[v].end(); ++it)
+    57613:  108:        if (visited[*it] < degree(*it))
+    44757:  109:            DFSUtil(*it, visited);
+    54758:  110:}
+        -:  111:
+        -:  112:/**
+        -:  113: * @brief Checks if the graph is connected.
+        -:  114: *
+        -:  115: * This function determines if the graph is connected by performing the following steps:
+        -:  116: * 1. Initializes a visited array to keep track of visited vertices.
+        -:  117: * 2. Finds a vertex with a non-zero degree to start the DFS traversal.
+        -:  118: * 3. If all vertices have zero degree, the graph is considered connected.
+        -:  119: * 4. Performs a Depth-First Search (DFS) starting from the found vertex.
+        -:  120: * 5. After the DFS traversal, checks if there are any unvisited vertices with a non-zero degree.
+        -:  121: *
+        -:  122: * @return true if the graph is connected, false otherwise.
+        -:  123: */
+    10001:  124:bool Graph::isConnected()
+        -:  125:{
+        -:  126:
+    10001:  127:    int visited[V];
+        -:  128:    int i;
+    60005:  129:    for (i = 0; i < V; i++)
+    50004:  130:        visited[i] = 0;
+        -:  131:
+    10045:  132:    for (i = 0; i < V; i++)
+    10045:  133:        if (degree(i) != 0)
+    10001:  134:            break;
+        -:  135:
+    10001:  136:    if (i == V)
+    #####:  137:        return true;
+        -:  138:
+    10001:  139:    DFSUtil(i, visited);
+        -:  140:
+    35047:  141:    for (i = 0; i < V; i++)
+    32536:  142:        if (visited[i] == 0 && degree(i) > 0)
+     7490:  143:            return false;
+        -:  144:
+     2511:  145:    return true;
+    10001:  146:}
+        -:  147:
+        -:  148:/**
+        -:  149: * @brief Determines if the graph is Eulerian.
+        -:  150: *
+        -:  151: * This function checks if the graph is Eulerian by performing the following steps:
+        -:  152: * 1. Checks if the graph is connected. If not, returns 0.
+        -:  153: * 2. Counts the number of vertices with an odd degree.
+        -:  154: * 3. Ensures that the in-degree and out-degree of each vertex are equal.
+        -:  155: * 4. If more than two vertices have an odd degree, returns 0.
+        -:  156: *
+        -:  157: * @return
+        -:  158: * - 0 if the graph is not Eulerian.
+        -:  159: * - 1 if the graph has an Eulerian path (semi-Eulerian).
+        -:  160: * - 2 if the graph has an Eulerian cycle.
+        -:  161: */
+    10001:  162:int Graph::isEulerian()
+        -:  163:{
+        -:  164:
+    10001:  165:    if (isConnected() == false)
+     7490:  166:        return 0;
+        -:  167:
+     2511:  168:    int odd = 0;
+     3495:  169:    for (int i = 0; i < V; i++)
+        -:  170:    {
+     3454:  171:        odd += degree(i) % 2;
+     3454:  172:        if (inDegree(i) != outDegree(i))
+     2470:  173:            return 0;
+        -:  174:    }
+        -:  175:
+       41:  176:    if (odd > 2)
+    #####:  177:        return 0;
+        -:  178:
+      41*:  179:    return odd ? 1 : 2;
+        -:  180:    ;
+        -:  181:}
+        -:  182:
+        -:  183:/**
+        -:  184: * @brief Prints the Eulerian circuit of the graph.
+        -:  185: *
+        -:  186: * This function finds and prints the Eulerian circuit of the graph using
+        -:  187: * Hierholzer's algorithm. It starts from vertex 0 and traverses the graph
+        -:  188: * using a stack to keep track of the current path and a vector to store
+        -:  189: * the final circuit. The function assumes that the graph is represented
+        -:  190: * using an adjacency list stored in the member variable `adj`.
+        -:  191: *
+        -:  192: * The function performs the following steps:
+        -:  193: * 1. Initializes a stack to keep track of the current path and a vector
+        -:  194: *    to store the final circuit.
+        -:  195: * 2. Pushes the starting vertex (0) onto the stack.
+        -:  196: * 3. While the stack is not empty, it performs the following:
+        -:  197: *    - Gets the current vertex from the top of the stack.
+        -:  198: *    - If the current vertex has adjacent vertices, it pushes the next
+        -:  199: *      adjacent vertex onto the stack and removes it from the adjacency list.
+        -:  200: *    - If the current vertex has no adjacent vertices, it adds the current
+        -:  201: *      vertex to the circuit and pops it from the stack.
+        -:  202: * 4. Prints the vertices in the circuit in reverse order, separated by " -> ".
+        -:  203: *
+        -:  204: * @note The function assumes that the graph has an Eulerian circuit.
+        -:  205: */
+       41:  206:void Graph::printEulerCircuit()
+        -:  207:{
+       41:  208:    if (adj == nullptr)
+    #####:  209:        return;
+        -:  210:
+       41:  211:    std::stack<int> curr_path;
+       41:  212:    std::vector<int> circuit;
+        -:  213:
+       41:  214:    curr_path.push(0);
+        -:  215:
+      574:  216:    while (!curr_path.empty())
+        -:  217:    {
+      533:  218:        int curr_v = curr_path.top();
+        -:  219:
+      533:  220:        if (!adj[curr_v].empty())
+        -:  221:        {
+      246:  222:            int next_v = adj[curr_v].back();
+      246:  223:            adj[curr_v].pop_back();
+      246:  224:            curr_path.push(next_v);
+        -:  225:        }
+        -:  226:        else
+        -:  227:        {
+      287:  228:            circuit.push_back(curr_v);
+      287:  229:            curr_path.pop();
+        -:  230:        }
+        -:  231:    }
+        -:  232:
+      328:  233:    for (int i = circuit.size() - 1; i >= 0; i--)
+        -:  234:    {
+      287:  235:        std::cout << circuit[i];
+      287:  236:        if (i > 0)
+        -:  237:        {
+      246:  238:            std::cout << " -> ";
+        -:  239:        }
+        -:  240:    }
+       41:  241:    std::cout << std::endl;
+       41:  242:}
+        -:  243:
+        -:  244:/**
+        -:  245: * @brief Generates a random graph with a specified number of vertices and edges.
+        -:  246: *
+        -:  247: * This function creates a random graph with `v` vertices and `e` edges using the provided seed for random number generation.
+        -:  248: * It ensures that there are no self-loops and no duplicate edges between any two vertices.
+        -:  249: *
+        -:  250: * @param v The number of vertices in the graph.
+        -:  251: * @param e The number of edges to be added to the graph.
+        -:  252: * @param seed The seed for the random number generator to ensure reproducibility.
+        -:  253: * @return A randomly generated graph with `v` vertices and `e` edges.
+        -:  254: */
+    10001:  255:Graph Graph::generateRandomGraph(int v, int e, int seed)
+        -:  256:{
+    10001:  257:    std::srand(seed);
+    10001:  258:    Graph g(v);
+   115704:  259:    for (int i = 0; i < e; i++)
+        -:  260:    {
+   105703:  261:        int src = std::rand() % v;
+   105703:  262:        int dst = std::rand() % v;
+   105703:  263:        if (src == dst)
+        -:  264:        {
+    21106:  265:            i--;
+    45700:  266:            continue;
+        -:  267:        }
+        -:  268:
+    84597:  269:        bool flag = false;
+    84597:  270:        std::list<int>::iterator it;
+   133924:  271:        for (it = g.adj[src].begin(); it != g.adj[src].end(); it++)
+    49327:  272:            if (*it == dst)
+    12302:  273:                flag = true;
+    84597:  274:        if (flag)
+        -:  275:        {
+    12302:  276:            i--;
+    12302:  277:            continue;
+        -:  278:        }
+        -:  279:
+   115669:  280:        for (it = g.adj[dst].begin(); it != g.adj[dst].end(); it++)
+    43374:  281:            if (*it == src)
+    12292:  282:                flag = true;
+    72295:  283:        if (flag)
+        -:  284:        {
+    12292:  285:            i--;
+    12292:  286:            continue;
+        -:  287:        }
+        -:  288:
+    60003:  289:        g.addEdge(src, dst);
+        -:  290:    }
+    10001:  291:    return g;
+    =====:  292:}

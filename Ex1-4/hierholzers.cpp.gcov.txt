@@ -1,0 +1,91 @@
+        -:    0:Source:hierholzers.cpp
+        -:    0:Graph:hierholzers.gcno
+        -:    0:Data:hierholzers.gcda
+        -:    0:Runs:10003
+        -:    1:#include "EulerianCycleFinder.hpp"
+        -:    2:
+        -:    3:/**
+        -:    4: * @brief Tests if a given graph is Eulerian and prints the result.
+        -:    5: *
+        -:    6: * This function checks if the provided graph is Eulerian by calling the
+        -:    7: * isEulerian() method of the Graph class. It then prints the result:
+        -:    8: * - "graph is not Eulerian" if the graph is not Eulerian.
+        -:    9: * - "graph has a Euler path" if the graph has an Euler path.
+        -:   10: * - "graph has a Euler cycle" if the graph has an Euler cycle, followed by
+        -:   11: *   printing the Euler circuit using the printEulerCircuit() method of the
+        -:   12: *   Graph class.
+        -:   13: *
+        -:   14: * @param g Reference to the Graph object to be tested.
+        -:   15: */
+    10001:   16:void testEulerian(Graph &g)
+        -:   17:{
+    10001:   18:    int res = g.isEulerian();
+    10001:   19:    if (res == 0)
+     9960:   20:        std::cout << "graph is not Eulerian" << std::endl;
+        -:   21:
+       41:   22:    else if (res == 1)
+    #####:   23:        std::cout << "graph has a Euler path" << std::endl;
+        -:   24:    else
+        -:   25:    {
+       41:   26:        std::cout << "graph has a Euler cycle: " << std::endl;
+       41:   27:        g.printEulerCircuit();
+        -:   28:    }
+    10001:   29:}
+        -:   30:
+        -:   31:/**
+        -:   32: * @brief Entry point of the program.
+        -:   33: *
+        -:   34: * This function parses command-line arguments to initialize the number of edges, vertices, and seed for random graph generation.
+        -:   35: * It then generates a random graph based on these parameters, prints the graph, and tests if the graph is Eulerian.
+        -:   36: *
+        -:   37: * @param argc The number of command-line arguments.
+        -:   38: * @param argv The array of command-line arguments.
+        -:   39: *
+        -:   40: * Command-line arguments:
+        -:   41: * -e <edges>    : Number of edges in the graph.
+        -:   42: * -v <vertices> : Number of vertices in the graph.
+        -:   43: * -s <seed>     : Seed for random number generation.
+        -:   44: *
+        -:   45: * If the required arguments are not provided, the program will print the usage information and exit with status 1.
+        -:   46: *
+        -:   47: * @return int Exit status of the program.
+        -:   48: */
+    10003:   49:int main(const int argc, char **argv)
+        -:   50:{
+    10003:   51:    int opt = 0, seed = 0, v = 0, e = 0;
+    10003:   52:    if (argc < 4)
+        -:   53:    {
+        1:   54:        std::cerr << "Usage: " << argv[0] << " -e <edges> -v <vertices> -s <seed>" << std::endl;
+        1:   55:        std::exit(1);
+        -:   56:    }
+        -:   57:
+    40009:   58:    while ((opt = getopt(argc, argv, "e:v:s:")) != -1)
+        -:   59:    {
+    30007:   60:        switch (opt)
+        -:   61:        {
+    10002:   62:        case 'e':
+    10002:   63:            e = atoi(optarg);
+    10002:   64:            break;
+    10002:   65:        case 'v':
+    10002:   66:            v = atoi(optarg);
+    10002:   67:            break;
+    10002:   68:        case 's':
+    10002:   69:            seed = atoi(optarg);
+    10002:   70:            break;
+        1:   71:        default:
+        1:   72:            break;
+        -:   73:        }
+        -:   74:    }
+        -:   75:
+    10002:   76:    if (v * v - 1 < e)
+        -:   77:    {
+        1:   78:        std::cerr << "Invalid number of edges for given amount of vertexes" << std::endl;
+        1:   79:        std::exit(1);
+        -:   80:    }
+        -:   81:
+    10001:   82:    Graph g = Graph::generateRandomGraph(v, e, seed);
+    10001:   83:    g.printGraph();
+    10001:   84:    testEulerian(g);
+    10001:   85:    std::cout << std::endl;
+    10001:   86:    std::exit(0);
+        -:   87:}
